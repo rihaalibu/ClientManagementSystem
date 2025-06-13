@@ -114,7 +114,7 @@ const ResourceManagement = () => {
     return (
         <Box>
             <Paper sx={{ p: 2, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h4">Resource Management</Typography>
+                <Typography variant="h4">Employee Management</Typography>
                 <Button variant="contained" onClick={() => setOpenDialog(true)}>
                     Add New Resource
                 </Button>
@@ -128,7 +128,7 @@ const ResourceManagement = () => {
                             <TableCell>Name</TableCell>
                             <TableCell>Technology</TableCell>
                             {/* <TableCell>Project ID</TableCell> */}
-                            <TableCell>Salary</TableCell>
+                            <TableCell>Salary per year</TableCell>
                             <TableCell>Actions</TableCell>
                         </TableRow>
                     </TableHead>
@@ -178,10 +178,14 @@ const ResourceManagement = () => {
                             onChange={(e) => setNewEmployee({...newEmployee, technology: e.target.value})}
                         >
                             <MenuItem value="React">React</MenuItem>
-                            <MenuItem value="React">React</MenuItem>
+                            <MenuItem value="Next.js">Next.js</MenuItem>
                             <MenuItem value="Node.js">Node.js</MenuItem>
                             <MenuItem value="Python">Python</MenuItem>
                             <MenuItem value="Java">Java</MenuItem>
+                            <MenuItem value="DevOps">DevOps</MenuItem>
+                            <MenuItem value="Cyber Security">Cyber Security</MenuItem>
+                            <MenuItem value="C#">C#</MenuItem>
+                            <MenuItem value="Project Management">Project Management</MenuItem>
                         </Select>
                     </FormControl>
                     <TextField
@@ -218,9 +222,14 @@ const ResourceManagement = () => {
                         >
                             <MenuItem value={editEmployee.technology}>{editEmployee.technology}</MenuItem>
                             <MenuItem value="React">React</MenuItem>
+                            <MenuItem value="Next.js">Next.js</MenuItem>
                             <MenuItem value="Node.js">Node.js</MenuItem>
                             <MenuItem value="Python">Python</MenuItem>
                             <MenuItem value="Java">Java</MenuItem>
+                            <MenuItem value="DevOps">DevOps</MenuItem>
+                            <MenuItem value="Cyber Security">Cyber Security</MenuItem>
+                            <MenuItem value="C#">C#</MenuItem>
+                            <MenuItem value="Project Management">Project Management</MenuItem>
                         </Select>
                     </FormControl>
                     <TextField

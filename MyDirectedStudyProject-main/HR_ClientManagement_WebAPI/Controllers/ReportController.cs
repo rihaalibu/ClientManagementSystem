@@ -45,29 +45,33 @@ namespace HR_ClientManagement_WebAPI.Controllers
         }
 
         [HttpGet("revenue-by-client")]
-        public  IActionResult GetRevenueByClient()
+        public async Task<IActionResult> GetRevenueByClient()
         {
-             //.Where(p => p.ClientId == clientId)
-            var revenue =  _context.Projects
-                .Select(p => new ClientDTO
-                {
-                    ClientName = p.Client.ClientName,
-                    Revenue = p.ProjectValue,
-                    Costs = p.ResourceAllocations
-                        .Sum(ra => ra.Resource.Salary),
-                    Profit = p.ProjectValue - p.ResourceAllocations
-                        .Sum(ra => ra.Resource.Salary),
-                    Projects = p.ResourceAllocations.Select(ra => new ProjectRevenueDTO
-                    {
-                        ProjectName = p.ProjectName,
-                        Revenue = p.ProjectValue,
-                        ResourceCost = p.ResourceAllocations.Sum(ra => ra.Resource.Salary)
 
-                    })
+            var clients = await _context.Clients.Include(c => c.Projects).ThenInclude(p => p.ResourceAllocations).ThenInclude(ra => ra.Resource).ToListAsync();
+            //.Where(p => p.ClientId == clientId)
+            var employees = await _context.Employees.ToListAsync();
+            var clientRevenues = clients.Select(c => {
+                // Get unique projects for this client
+                var projects = c.Projects.Select(p => new ProjectRevenueDTO {
+                    ProjectName = p.ProjectName,
+                    Revenue = p.ProjectValue,
+                    ResourceCost = p.ResourceAllocations.Distinct().Sum(ra => ra.Resource.Salary)
                 }).ToList();
 
+                return new ClientDTO {
+                    ClientName = c.ClientName,
+                    Revenue = c.Projects.Sum(p => p.ProjectValue),
+                    Costs = c.Projects.SelectMany(p => p.ResourceAllocations).Distinct().Sum(ra => ra.Resource.Salary),
+                    Profit = c.Projects.Sum(p => p.ProjectValue) - c.Projects.SelectMany(p => p.ResourceAllocations).Sum(ra => ra.Resource.Salary),
+                    
+                     Projects = projects
+                };
+            }).ToList();
 
-            return Ok(revenue);
+
+        
+            return Ok(clientRevenues);
         }
 
         [HttpGet("resources-by-technology")]

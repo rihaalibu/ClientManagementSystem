@@ -21,6 +21,7 @@ interface RevenueData {
     revenue: number;
     costs: number;
     profit: number;
+    totalCost: number;
     projects: {
         projectName: string;
         revenue: number;
@@ -55,28 +56,31 @@ const RevenueDetails = () => {
     const fetchRevenueData = async () => {
         try {
             const response = await httpClient.get('/api/report/revenue-by-client');
-            setRevenueData(response.data);
-            calculateTotalStats(response.data);
+            if(response.data && Array.isArray(response.data)){
+                const validData = response.data.filter(client => client && typeof client.revenue === 'number' && typeof client.costs === 'number');
+                setRevenueData(validData);
+                calculateTotalStats(validData);
+            }
+            else{
+                console.error('Invalid data format received from API');            
+            }      
             setLoading(false);
         } catch (error) {
             console.error('Error fetching revenue data:', error);
             setLoading(false);
         }
     };
-
     const calculateTotalStats = (data: RevenueData[]) => {
         const stats = data.reduce((acc, curr) => ({
             totalRevenue: acc.totalRevenue + curr.revenue,
-            totalCosts: acc.totalCosts + curr.costs,
+            totalCosts: acc.totalCosts  + curr.costs,
             totalProfit: acc.totalProfit + curr.profit
         }), { totalRevenue: 0, totalCosts: 0, totalProfit: 0 });
         setTotalStats(stats);
     };
-
     if (loading) {
         return <CircularProgress />;
     }
-
     return (
         <Box>
             <Typography variant="h4" gutterBottom>Revenue Analysis</Typography>
@@ -98,6 +102,7 @@ const RevenueDetails = () => {
                             <Typography color="textSecondary">Total Costs</Typography>
                             <Typography variant="h4" color="error">
                                 ${totalStats.totalCosts.toLocaleString()}
+                                
                             </Typography>
                         </CardContent>
                     </Card>
@@ -120,11 +125,11 @@ const RevenueDetails = () => {
                     <Grid container spacing={2} sx={{ mb: 2 }}>
                         <Grid item xs={12}>
                             <Typography variant="body2" color="textSecondary">
-                                Profit Margin: {((client.profit / client.revenue) * 100).toFixed(1)}%
+                                Profit Margin: {client.revenue > 0 ? ((client.profit / client.revenue) * 100).toFixed(1) : '0'}%
                             </Typography>
                             <LinearProgress 
                                 variant="determinate" 
-                                value={(client.profit / client.revenue) * 100}
+                                value={client.revenue > 0 ? Math.min((client.profit / client.revenue) * 100, 100) : 0}
                                 sx={{ mt: 1 }}
                             />
                         </Grid>

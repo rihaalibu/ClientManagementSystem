@@ -21,8 +21,6 @@ namespace HR_ClientManagement_WebAPI.Controllers
             var cl_list = context.Clients.ToList();
             return cl_list;
         }
-
-
         [Authorize]
         [HttpGet("{id}")]
         public IActionResult Get(int id, [FromServices] HRAppDBContext context)
@@ -37,32 +35,27 @@ namespace HR_ClientManagement_WebAPI.Controllers
                 return NotFound("404 - client not found");
             }
         }
-
-
         [Authorize]
         [HttpPost]
         public IActionResult Post([FromBody] Client client, [FromServices] HRAppDBContext context)
         {
-            Debug.WriteLine(client);
+            //Debug.WriteLine(client);
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(ModelState); 
             }
-            if (client != null)
+            if (client != null) 
             {
-                context.Clients.Add(client);
+                context.Clients.Add(client); 
                 context.SaveChanges();
 
-                return CreatedAtAction(nameof(Post), new { id = client.ClientId }, client);
+                return CreatedAtAction(nameof(Post), new { id = client.ClientId }, client); 
             }
             else
             {
                 return BadRequest("Empty data");
             }
         }
-
-
-
         [Authorize]
         [HttpDelete("DeleteClient/{id}")]
         public async Task<IActionResult> Delete(int id, [FromServices] HRAppDBContext context)
@@ -90,6 +83,8 @@ namespace HR_ClientManagement_WebAPI.Controllers
 
             }
             existingclient.ClientName = updatedclient.ClientName;
+            existingclient.TotalAmountPaid = updatedclient.TotalAmountPaid;
+            existingclient.IsActive = updatedclient.IsActive;
             //existingclient.ProjectID = updatedclient.ProjectID;
             await context.SaveChangesAsync();
             return Ok("updated successfully");

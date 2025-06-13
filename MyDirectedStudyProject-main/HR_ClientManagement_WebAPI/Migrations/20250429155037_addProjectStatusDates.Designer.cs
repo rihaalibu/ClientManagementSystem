@@ -3,6 +3,7 @@ using System;
 using HR_ClientManagement_WebAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HR_ClientManagement_WebAPI.Migrations
 {
     [DbContext(typeof(HRAppDBContext))]
-    partial class HRAppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250429155037_addProjectStatusDates")]
+    partial class addProjectStatusDates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,11 +102,10 @@ namespace HR_ClientManagement_WebAPI.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<DateTime>("StartDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("current_date + interval '90 days'");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("ProjectId");

@@ -22,16 +22,13 @@ import {
     Business as BusinessIcon
 } from '@mui/icons-material';
 import { createAuthenticatedAxios } from '../utils/api';
-
 const httpClient = createAuthenticatedAxios();
-
 const Login = () => {
     const [credentials, setCredentials] = useState({ username: '', password: '' });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const navigate = useNavigate();
-    
+    const navigate = useNavigate();  
     useEffect(() => {
         // Check if user is already logged in
         const isAuthenticated = localStorage.getItem('isAuthenticated');
@@ -41,28 +38,23 @@ const Login = () => {
             navigate('/dashboard');
         }
     }, [navigate]);
-    
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        
-        // Validate inputs
+        // Validating inputs
         if (!credentials.username.trim() || !credentials.password.trim()) {
             setError('Please enter both username and password');
             return;
-        }
-        
+        }  
         setIsLoading(true);
         setError('');
-        
         try {
             const response = await httpClient.post('/api/auth/login', credentials);
             if (response.data.token) {
-                // Store auth data
+                // Storing auth data
                 localStorage.setItem('isAuthenticated', 'true');
                 localStorage.setItem('token', response.data.token);
-                localStorage.setItem('username', credentials.username);
-                
-                // Redirect to dashboard
+                localStorage.setItem('username', credentials.username);  
+                // Redirecting to dashboard
                 navigate('/dashboard', {replace: true});   
             } else {
                 setError('Invalid response from server. Please try again.');
@@ -86,11 +78,9 @@ const Login = () => {
             setIsLoading(false);
         }
     };
-
     const handleTogglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
-
     return (
         <Box sx={{ 
             minHeight: '100vh', 
@@ -135,7 +125,7 @@ const Login = () => {
                                     <BusinessIcon fontSize="large" />
                                 </Box>
                                 <Typography variant="h5" component="h1" fontWeight="bold">
-                                    HR Management System
+                                    Higher Management Client Management System
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                                     Sign in to access your dashboard
@@ -194,11 +184,11 @@ const Login = () => {
                                         )
                                     }}
                                 />
-                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1, mb: 2 }}>
+                                {/*<Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1, mb: 2 }}>
                                     <Link href="#" variant="body2" underline="hover">
                                         Forgot password?
                                     </Link>
-                                </Box>
+                                </Box>*/}
                                 <Button 
                                     fullWidth 
                                     variant="contained" 

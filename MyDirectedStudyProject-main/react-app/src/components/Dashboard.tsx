@@ -27,18 +27,18 @@ import {
 import {
     Assessment as ReportIcon,
     Assignment as ProjectIcon,
-    Devices as TechnologyIcon,
+    //Devices as TechnologyIcon,
     Group as ResourceIcon,
     Menu as MenuIcon,
     People as ClientIcon,
     Dashboard as DashboardIcon,
     Notifications as NotificationIcon,
     ExitToApp as LogoutIcon,
-    Settings as SettingsIcon,
+    //Settings as SettingsIcon,
     Person as PersonIcon
 } from "@mui/icons-material";
 import ResourceManagement from "./ResourceManagement";
-import TechnologyReport from "./TechnologyReport";
+//import TechnologyReport from "./TechnologyReport";
 import RevenueDetails from "./RevenueDetails";
 import ClientManagement from "./ClientManagement";
 import ProjectManagement from "./ProjectManagement";
@@ -51,7 +51,7 @@ const httpClient = createAuthenticatedAxios();
 interface DashboardSummary {
     totalClients: number;
     activeProjects: number;
-    totalResources: number;
+    totalEmployees: number;
     totalRevenue: number;
     loading: boolean;
 }
@@ -71,20 +71,20 @@ const Dashboard = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
-    
+
     // Dashboard data state
     const [dashboardData, setDashboardData] = useState<DashboardSummary>({
         totalClients: 0,
         activeProjects: 0,
-        totalResources: 0,
+        totalEmployees: 0,
         totalRevenue: 0,
         loading: true
     });
-    
+
     // User menu state
     const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
     const userMenuOpen = Boolean(userMenuAnchor);
-    
+
     // Notifications state
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [notificationAnchor, setNotificationAnchor] = useState<null | HTMLElement>(null);
@@ -97,7 +97,7 @@ const Dashboard = () => {
             navigate('/login');
             return;
         }
-        
+
         // Try to get username from token or localStorage
         const storedUsername = localStorage.getItem('username');
         if (storedUsername) {
@@ -106,37 +106,35 @@ const Dashboard = () => {
             // Default username if not found , lets remove it later..
             //setUsername("Admin user");
         }
-        
+
         // Fetch dashboard summary data
         fetchDashboardSummary();
-        
+
         // Generate notifications based on system events
         generateNotifications();
     }, [navigate]);
 
     const fetchDashboardSummary = async () => {
         try {
-            // Fetch clients
+            // Fetching clients
             const clientsResponse = await httpClient.get('/api/client');
             const clients = clientsResponse.data;
+            console.log("Below are the clients");
+            console.log(clients);
             const activeClients = clients.filter((c: any) => c.isActive).length;
-            
-            // Fetch projects
+            // Fetching projects
             const projectsResponse = await httpClient.get('/api/project');
             const projects = projectsResponse.data;
-            
-            // Fetch resources
-            const resourcesResponse = await httpClient.get('/api/technicalresource');
-            const resources = resourcesResponse.data;
-            
-            // Calculate total revenue from client payments
-            const totalRevenue = clients.reduce((sum: number, client: any) => 
-                sum + (client.totalAmountPaid || 0), 0);
-            
+            // Fetching employees
+            const employeesResponse = await httpClient.get('/api/technicalresource');
+            const employees = employeesResponse.data;
+            // Calculating total revenue from client payments
+            const totalRevenue = projects.reduce((sum: number, project: any) =>
+                sum + (project.projectValue || 0), 0);
             setDashboardData({
                 totalClients: clients.length,
                 activeProjects: projects.length,
-                totalResources: resources.length,
+                totalEmployees: employees.length,
                 totalRevenue: totalRevenue,
                 loading: false
             });
@@ -151,16 +149,16 @@ const Dashboard = () => {
             // Get recent data to generate notifications
             const clientsResponse = await httpClient.get('/api/client');
             const clients = clientsResponse.data;
-            
+
             const projectsResponse = await httpClient.get('/api/project');
             const projects = projectsResponse.data;
-            
-            const resourcesResponse = await httpClient.get('/api/technicalresource');
-            const resources = resourcesResponse.data;
-            
+
+            const employeesResponse = await httpClient.get('/api/technicalresource');
+            const employees = employeesResponse.data;
+
             // Generate notifications based on data
             const systemNotifications: Notification[] = [];
-            
+
             // Add notification for recently added clients (assuming the last 2 are recent)
             if (clients.length > 0) {
                 const recentClients = clients.slice(-2);
@@ -174,21 +172,21 @@ const Dashboard = () => {
                     });
                 });
             }
-            
+
             // Add notification for projects with low resource allocation
-            const projectsWithResources = projects.filter((p: any) => 
+            const projectsWithEmployees = projects.filter((p: any) =>
                 p.resourceAllocations && p.resourceAllocations.length < 2);
-            
-            projectsWithResources.slice(0, 2).forEach((project: any, index: number) => {
+
+            projectsWithEmployees.slice(0, 2).forEach((project: any, index: number) => {
                 systemNotifications.push({
                     id: systemNotifications.length + 1,
-                    message: `Project "${project.projectName}" needs more resources`,
+                    message: `Project "${project.projectName}" needs more employees`,
                     date: new Date(Date.now() - (index + 1) * 7200000).toISOString(),
                     read: false,
                     type: 'warning'
                 });
             });
-            
+
             // Add a revenue report notification
             systemNotifications.push({
                 id: systemNotifications.length + 1,
@@ -197,7 +195,7 @@ const Dashboard = () => {
                 read: true,
                 type: 'success'
             });
-            
+
             setNotifications(systemNotifications);
         } catch (error) {
             console.error('Error generating notifications:', error);
@@ -257,28 +255,28 @@ const Dashboard = () => {
             icon: <DashboardIcon />,
         },
         {
-            id: "resources",
-            text: "Resource Management",
+            id: "employees",
+            text: "Employee Management",
             icon: <ResourceIcon />,
         },
         {
-            id: "client", 
+            id: "client",
             text: "Client Management",
             icon: <ClientIcon />
         },
         {
-            id: "project", 
+            id: "project",
             text: "Project Management",
             icon: <ProjectIcon />
         },
-        {
+        /*{
             id: "technology",
             text: "Technology Distribution",
             icon: <ProjectIcon />,
-        },
-        { 
-            id: "revenue", 
-            text: "Revenue Analysis", 
+        },*/
+        {
+            id: "revenue",
+            text: "Revenue Analysis",
             icon: <ReportIcon />
         },
     ];
@@ -288,13 +286,13 @@ const Dashboard = () => {
 
     return (
         <Box sx={{ display: "flex" }}>
-            <AppBar 
-                position="fixed" 
-                sx={{ 
+            <AppBar
+                position="fixed"
+                sx={{
                     zIndex: (theme) => theme.zIndex.drawer + 1,
                     boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
                     backgroundColor: '#fff',
-                    color: '#333'
+                    color: '#333333'
                 }}
             >
                 <Toolbar>
@@ -307,9 +305,9 @@ const Dashboard = () => {
                         <MenuIcon />
                     </IconButton>
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-                        HR Management System
+                        Higher Management Client Management System
                     </Typography>
-                    
+
                     {/* Notifications */}
                     <Tooltip title="Notifications">
                         <IconButton color="inherit" onClick={handleNotificationOpen}>
@@ -318,12 +316,12 @@ const Dashboard = () => {
                             </Badge>
                         </IconButton>
                     </Tooltip>
-                    
+
                     {/* User menu */}
-                    <Box 
-                        sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
                             ml: 2,
                             cursor: 'pointer'
                         }}
@@ -359,9 +357,9 @@ const Dashboard = () => {
                 <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography variant="h6">Notifications</Typography>
-                        <Typography 
-                            variant="body2" 
-                            color="primary" 
+                        <Typography
+                            variant="body2"
+                            color="primary"
                             sx={{ cursor: 'pointer' }}
                             onClick={handleMarkAllRead}
                         >
@@ -372,10 +370,10 @@ const Dashboard = () => {
                 <List sx={{ p: 0 }}>
                     {notifications.length > 0 ? (
                         notifications.map((notification) => (
-                            <ListItem 
-                                key={notification.id} 
+                            <ListItem
+                                key={notification.id}
                                 disablePadding
-                                sx={{ 
+                                sx={{
                                     borderBottom: '1px solid #f0f0f0',
                                     backgroundColor: notification.read ? 'transparent' : 'rgba(25, 118, 210, 0.08)'
                                 }}
@@ -409,7 +407,7 @@ const Dashboard = () => {
                     'aria-labelledby': 'user-menu-button',
                 }}
             >
-                <MenuItem onClick={handleUserMenuClose}>
+                {/*<MenuItem onClick={handleUserMenuClose}>
                     <ListItemIcon>
                         <PersonIcon fontSize="small" />
                     </ListItemIcon>
@@ -420,7 +418,7 @@ const Dashboard = () => {
                         <SettingsIcon fontSize="small" />
                     </ListItemIcon>
                     <ListItemText>Settings</ListItemText>
-                </MenuItem>
+                </MenuItem>*/}
                 <Divider />
                 <MenuItem onClick={handleLogout}>
                     <ListItemIcon>
@@ -437,8 +435,8 @@ const Dashboard = () => {
                 sx={{
                     width: drawerWidth,
                     flexShrink: 0,
-                    [`& .MuiDrawer-paper`]: { 
-                        width: drawerWidth, 
+                    [`& .MuiDrawer-paper`]: {
+                        width: drawerWidth,
                         boxSizing: 'border-box',
                         backgroundColor: '#f8f9fa',
                         borderRight: '1px solid #e0e0e0'
@@ -449,7 +447,7 @@ const Dashboard = () => {
                 <Box sx={{ overflow: 'auto', mt: 2 }}>
                     <List>
                         {menuItems.map((item) => (
-                            <ListItem 
+                            <ListItem
                                 key={item.id}
                                 disablePadding
                                 sx={{
@@ -474,14 +472,14 @@ const Dashboard = () => {
                                         }
                                     }}
                                 >
-                                    <ListItemIcon sx={{ 
+                                    <ListItemIcon sx={{
                                         color: activeSection === item.id ? 'primary.main' : 'text.secondary',
                                         minWidth: 40
                                     }}>
                                         {item.icon}
                                     </ListItemIcon>
-                                    <ListItemText 
-                                        primary={item.text} 
+                                    <ListItemText
+                                        primary={item.text}
                                         primaryTypographyProps={{
                                             fontWeight: activeSection === item.id ? 'medium' : 'regular',
                                             color: activeSection === item.id ? 'primary.main' : 'text.primary'
@@ -494,9 +492,9 @@ const Dashboard = () => {
                 </Box>
             </Drawer>
 
-            <Box component="main" sx={{ 
-                flexGrow: 1, 
-                p: 3, 
+            <Box component="main" sx={{
+                flexGrow: 1,
+                p: 3,
                 mt: 8,
                 backgroundColor: '#f5f7fa',
                 minHeight: '100vh'
@@ -504,18 +502,25 @@ const Dashboard = () => {
                 <Container maxWidth="xl">
                     {activeSection === "dashboard" && (
                         <Box>
-                            <Typography variant="h4" sx={{ mb: 4, fontWeight: 'medium' }}>
+                            <Typography color="text.primary"  variant="h4" sx={{ mb: 4, fontWeight: 'medium' }}>
                                 Dashboard Overview
                             </Typography>
                             <Grid container spacing={3}>
                                 <Grid item xs={12} md={6} lg={3}>
-                                    <Box sx={{ 
-                                        p: 3, 
-                                        bgcolor: 'white', 
+                                    <Box sx={{
+                                        p: 3,
+                                        bgcolor: 'white',
                                         borderRadius: 2,
                                         boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                                        height: '100%'
-                                    }}>
+                                        height: '100%',
+                                        cursor: 'pointer',
+                                        transition: 'transform 0.2s, box-shadow 0.2s',
+                                        '&:hover': {
+                                            transform: 'translateY(-4px)',
+                                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                                        }
+                                    }}onClick={() => setActiveSection("client")}>
+
                                         <Typography variant="h6" color="primary">
                                             Total Clients
                                         </Typography>
@@ -524,20 +529,27 @@ const Dashboard = () => {
                                                 <CircularProgress size={30} />
                                             </Box>
                                         ) : (
-                                            <Typography variant="h3" sx={{ mt: 2, fontWeight: 'bold' }}>
+                                            <Typography color="text.primary" variant="h4" sx={{ mt: 2, fontWeight: 'bold' }}>
                                                 {dashboardData.totalClients}
                                             </Typography>
                                         )}
                                     </Box>
                                 </Grid>
                                 <Grid item xs={12} md={6} lg={3}>
-                                    <Box sx={{ 
-                                        p: 3, 
-                                        bgcolor: 'white', 
+                                    <Box sx={{
+                                        p: 3,
+                                        bgcolor: 'white',
                                         borderRadius: 2,
                                         boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                                        height: '100%'
-                                    }}>
+                                        height: '100%',
+                                        cursor: 'pointer',
+                                        transition: 'transform 0.2s, box-shadow 0.2s',
+                                        '&:hover': {
+                                            transform: 'translateY(-4px)',
+                                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                                        }
+                                    }}onClick={() => setActiveSection("project")}>
+
                                         <Typography variant="h6" color="primary">
                                             Active Projects
                                         </Typography>
@@ -546,42 +558,54 @@ const Dashboard = () => {
                                                 <CircularProgress size={30} />
                                             </Box>
                                         ) : (
-                                            <Typography variant="h3" sx={{ mt: 2, fontWeight: 'bold' }}>
+                                            <Typography color="text.primary" variant="h4" sx={{ mt: 2, fontWeight: 'bold' }}>
                                                 {dashboardData.activeProjects}
                                             </Typography>
                                         )}
                                     </Box>
                                 </Grid>
                                 <Grid item xs={12} md={6} lg={3}>
-                                    <Box sx={{ 
-                                        p: 3, 
-                                        bgcolor: 'white', 
+                                    <Box sx={{
+                                        p: 3,
+                                        bgcolor: 'white',
                                         borderRadius: 2,
                                         boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                                        height: '100%'
-                                    }}>
+                                        height: '100%',
+                                        cursor: 'pointer',
+                                        transition: 'transform 0.2s, box-shadow 0.2s',
+                                        '&:hover': {
+                                            transform: 'translateY(-4px)',
+                                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                                        }
+                                    }}onClick={() => setActiveSection("employees")}>
                                         <Typography variant="h6" color="primary">
-                                            Total Resources
+                                            Total Employees
                                         </Typography>
                                         {dashboardData.loading ? (
                                             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
                                                 <CircularProgress size={30} />
                                             </Box>
                                         ) : (
-                                            <Typography variant="h3" sx={{ mt: 2, fontWeight: 'bold' }}>
-                                                {dashboardData.totalResources}
+                                            <Typography color="text.primary" variant="h4" sx={{ mt: 2, fontWeight: 'bold' }}>
+                                                {dashboardData.totalEmployees}
                                             </Typography>
                                         )}
                                     </Box>
                                 </Grid>
                                 <Grid item xs={12} md={6} lg={3}>
-                                    <Box sx={{ 
-                                        p: 3, 
-                                        bgcolor: 'white', 
+                                    <Box sx={{
+                                        p: 3,
+                                        bgcolor: 'white',
                                         borderRadius: 2,
                                         boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                                        height: '100%'
-                                    }}>
+                                        height: '100%',
+                                        cursor: 'pointer',
+                                        transition: 'transform 0.2s, box-shadow 0.2s',
+                                        '&:hover': {
+                                            transform: 'translateY(-4px)',
+                                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                                        }
+                                    }}onClick={() => setActiveSection("revenue")}>
                                         <Typography variant="h6" color="primary">
                                             Revenue
                                         </Typography>
@@ -590,7 +614,7 @@ const Dashboard = () => {
                                                 <CircularProgress size={30} />
                                             </Box>
                                         ) : (
-                                            <Typography variant="h3" sx={{ mt: 2, fontWeight: 'bold' }}>
+                                            <Typography color="text.primary" variant="h4" sx={{ mt: 2, fontWeight: 'bold' }}>
                                                 ${dashboardData.totalRevenue.toLocaleString()}
                                             </Typography>
                                         )}
@@ -599,16 +623,15 @@ const Dashboard = () => {
                             </Grid>
                         </Box>
                     )}
-                    {activeSection === "resources" && <ResourceManagement />}
-                    {activeSection === "technology" && <TechnologyReport />}
+                    {activeSection === "employees" && <ResourceManagement />}
+                    {/*{activeSection === "technology" && <TechnologyReport />}*/}
                     {activeSection === "project" && <ProjectManagement />}
                     {activeSection === "revenue" && <RevenueDetails />}
                     {activeSection === "client" && <ClientManagement />}
                 </Container>
-            </Box>
-        </Box>
+            </Box >
+        </Box >
     );
 };
 
 export default Dashboard;
-

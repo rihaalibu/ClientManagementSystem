@@ -15,8 +15,6 @@ namespace HR_ClientManagement_WebAPI.Models
         public DbSet<Project> Projects { get; set; }
         public DbSet<TechnicalResource> TechnicalResources { get; set; }
         public DbSet<ProjectResourceAllocation> ProjectResourceAllocations { get; set; }
-
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -25,7 +23,6 @@ namespace HR_ClientManagement_WebAPI.Models
                 .HasOne(p => p.Client)
                 .WithMany(c => c.Projects)
                 .HasForeignKey(p => p.ClientId);
-
 
             modelBuilder.Entity<ProjectResourceAllocation>()
                 .HasOne(pra => pra.Project)
@@ -49,7 +46,10 @@ namespace HR_ClientManagement_WebAPI.Models
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ProjectResourceAllocation>().Property(pra => pra.StartDate).HasDefaultValueSql("current_date");
+            
             modelBuilder.Entity<ProjectResourceAllocation>().Property(pra => pra.EndDate).HasDefaultValueSql("current_date + interval '90 days'");
+            modelBuilder.Entity<Project>().Property(pr => pr.StartDate).HasDefaultValueSql("current_date");
+            modelBuilder.Entity<Project>().Property(pr => pr.StartDate).HasDefaultValueSql("current_date + interval '90 days'");
 
         }
     }

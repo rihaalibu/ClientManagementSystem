@@ -41,7 +41,8 @@ namespace HR_ClientManagement_WebAPI.Controllers
                 return BadRequest();
             }
         }
-
+        
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<ProjectResourceAllocation>>> GetAllocations()
         {
             return await _context.ProjectResourceAllocations

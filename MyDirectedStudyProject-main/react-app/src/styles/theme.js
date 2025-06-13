@@ -8,7 +8,7 @@ const theme = {
       background: '#f5f5f5',   // Page background
       surface: '#ffffff',      // Card/component background
       text: {
-        primary: '#212121',    // Main text
+        primary: '#112121',    // Main text
         secondary: '#757575',  // Secondary text
         disabled: '#9e9e9e',   // Disabled text
       }
@@ -56,4 +56,3 @@ const theme = {
   };
   
   export default theme;
-  

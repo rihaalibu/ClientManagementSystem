@@ -18,12 +18,33 @@ namespace HR_ClientManagement_WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
+        public async Task<ActionResult<IEnumerable<ProjectDTO>>> GetProjects()
         {
             return await _context.Projects
-                .Include(p => p.Client)
-                .Include(p => p.ResourceAllocations)
-                .ToListAsync();
+               .Include(p => p.Client)
+               .Include(p => p.ResourceAllocations).Select(p => new ProjectDTO
+               {
+                   ClientId = p.ClientId,
+                   ClientName = p.Client.ClientName,
+                   ProjectId = p.ProjectId,
+                   ProjectName = p.ProjectName,
+                   IsMaintenanceProject = p.IsMaintenanceProject,
+                   ProjectValue = p.ProjectValue,
+                   Status = p.Status,
+                   StartDate = p.StartDate,
+                   EndDate = p.EndDate,
+                   Resources = p.ResourceAllocations.Select(res => new ResourceDTO
+                   {
+                       EmployeeId = res.ResourceId,
+                       EmployeeName = res.Resource.EmployeeName,
+                       Technology = res.Resource.Technology
+
+                   })
+
+               })
+               .ToListAsync();
+
+            //return await 
         }
 
         [HttpGet("{id}")]
@@ -43,6 +64,9 @@ namespace HR_ClientManagement_WebAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Project>> CreateProject(Project project)
         {
+            project.StartDate = project.StartDate.ToUniversalTime();
+            project.EndDate = project.EndDate.ToUniversalTime();
+            project.Status = project.Status;
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
 
@@ -55,6 +79,9 @@ namespace HR_ClientManagement_WebAPI.Controllers
             if (id != project.ProjectId)
                 return BadRequest();
 
+            project.StartDate = project.StartDate.ToUniversalTime();
+            project.EndDate = project.EndDate.ToUniversalTime();
+            project.Status = project.Status;
             _context.Entry(project).State = EntityState.Modified;
 
             try

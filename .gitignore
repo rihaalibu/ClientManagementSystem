@@ -364,4 +364,4 @@ FodyWeavers.xsd
 
 .cache/
 
-*appsettings.Development.json
+appsettings.Development.json
